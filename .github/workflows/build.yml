@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: node:18
+      image: mcr.microsoft.com/dotnet/sdk:7.0-alpine
 
     steps:
       - name: install
@@ -26,9 +26,11 @@ jobs:
         run: |
           git clone https://github.com/gssapi/gss-ntlmssp
           cd gss-ntlmssp
+          ls -l
 
       - name: make
         run: |
+          cd gss-ntlmssp
           autoreconf -f -i
           ./configure --without-manpages --disable-nls
           make install
@@ -37,21 +39,22 @@ jobs:
       - name: copy output
         run: |
           mkdir ouput
-          cp /usr/local/lib/gssntlmssp* ./ouput
+          ls /usr/local/lib/gssntlmssp -l
+          cp /usr/local/lib/gssntlmssp/* ./ouput
 
       - name: artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-without-markdown
+          name: output
           path: |
             ./ouput/*
 
-      - name: release
-        uses: svenstaro/upload-release-action@v2
-        with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ./ouput/*
-          asset_name: mything
-          tag: "0.${{ env.GITHUB_RUN_NUMBER}}"
-          overwrite: true
-          body: "auto release"
+      # - name: release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     file: ./ouput/*
+      #     asset_name: gssntlmssp
+      #     tag: "v0.${{ github.run_number }}"
+      #     overwrite: true
+      #     body: "auto release"
